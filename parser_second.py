@@ -1,31 +1,31 @@
 """
 
-my BNF for this parser
-        s = "((a|b)*)*"
+BNF for this parser
 
-re-> '(' re ')' |value '*' re | value '|' re  re| value re | '*' re | '|' re
+re-> '(' re* ')' |value '*' re | value '|' re | value re | '*' re | '|' re
 value-> sequence
 """
 
 from lexer import RE_SYMBOL, SEQUENCE, PARENTHESIS, LexicalAnalyzer
-
+from  nfa import NFA
 
 INTERVAL_LEN = 5
 class SequenceAST():
     def __init__(self, token):
         self.token = token
 
-    def run(self):
-        ## todo
-        return self.token
 
-    def get_print_len(self):
-        return len(self.token) + INTERVAL_LEN
+    def get_nfa(self):
+        token_len = len(self.token)
 
-    def get_childs(self):
-        childs = [self.token]
+        nfa_object = NFA().startState(0).acceptState(token_len - 1).initStates(token_len)
 
-        return childs
+        for i in range(token_len):
+            if i != token_len - 1:
+                nfa_object.addTransitions(i, self.token[i], i + 1)
+
+        return nfa_object
+
     def __repr__(self):
         return self.token
 
