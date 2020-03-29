@@ -37,7 +37,12 @@ class NFA():
 
         return self
 
-    ##todo support nfa
+
+    def curSymbol(self, q):
+        symbol_list =self.state_out[q]
+
+        return symbol_list[0]
+
     def nextState(self, q):
         symbol_list = self.state_out[q]
         next = self.transitions[(q, symbol_list[0])]
