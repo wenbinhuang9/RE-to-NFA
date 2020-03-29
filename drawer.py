@@ -2,9 +2,11 @@
 from PIL import Image, ImageDraw
 
 from nfa import  NFA
-## todo make  sequence NFA perfect
-## todo how to automatically deploy the picture
-## todo how to merge NFA
+
+## todo how to automatically postion the NFA, right now,  the key lies  in draw
+
+## todo how to star???
+
 class NFADrawer():
     def __init__(self):
         #by default now
@@ -13,7 +15,7 @@ class NFADrawer():
     def drawNFA(self, nfa_obj):
         im = Image.new('RGB', (500, 300), (255, 255, 255))
         draw = ImageDraw.Draw(im)
-        x0, y0 = 150, 150
+        x0, y0 = 50, 150
 
         self.__draw_recursive(nfa_obj, nfa_obj.start, draw, x0, y0)
         im.save('./pillow_imagedraw.jpg', quality=95)

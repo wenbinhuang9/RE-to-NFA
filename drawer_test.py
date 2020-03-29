@@ -7,7 +7,7 @@ from  nfa import  NFA
 from  drawer import  NFADrawer
 class MyTestCase(unittest.TestCase):
     def test_draw(self):
-        seq = SequenceAST("abcd")
+        seq = SequenceAST("abcde")
         nfa_obj = seq.get_nfa()
 
         nfaDrawer = NFADrawer()
