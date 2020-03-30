@@ -4,14 +4,4 @@ This project is to parse the regular expression to NFA(non-determinism finite au
 # Overveiw of Model
 
 
-```flow
-st=>start: Start:>https://www.markdown-syntax.com
-io=>inputoutput: verification
-op=>operation: Your Operation
-cond=>condition: Yes or No?
-sub=>subroutine: Your Subroutine
-e=>end
-st->io->op->cond
-cond(yes)->e
-cond(no)->sub->io
-```
+![image](https://github.com/wenbinhuang9/RE-to-NFA/blob/master/flow.png)
