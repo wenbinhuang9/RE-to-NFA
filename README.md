@@ -4,8 +4,14 @@ This project is to parse the regular expression to NFA(non-determinism finite au
 # Overveiw of Model
 
 
-```sequence
-Alice->Bob: Hello Bob, how are you ?
-Note right of Bob: Bob thinks
-Bob-->Alice: I am good thanks!
-```
+```flow
+st=>start: Start:>https://www.markdown-syntax.com
+io=>inputoutput: verification
+op=>operation: Your Operation
+cond=>condition: Yes or No?
+sub=>subroutine: Your Subroutine
+e=>end
+st->io->op->cond
+cond(yes)->e
+cond(no)->sub->io
+` ``
