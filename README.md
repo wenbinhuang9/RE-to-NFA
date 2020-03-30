@@ -6,14 +6,17 @@ The basic idea is parse the regular expressiont to an abstract syntax tree. And 
 
 ![image](https://github.com/wenbinhuang9/RE-to-NFA/blob/master/flow.png)
 
+
 # How to use
-'''
+```
 from  engine import convertREtoNFA
 
-input = "cd|eff|ab"
+input = "(0|1)*111"
 convertREtoNFA(input)
-'''
+```
+
 
 # Issues to fix
 
-1. 
+1. drawing line for star transition
+2. adding a drawing arrow function
