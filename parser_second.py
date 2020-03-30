@@ -18,11 +18,10 @@ class SequenceAST():
     def get_nfa(self):
         token_len = len(self.token)
 
-        nfa_object = NFA().startState(0).acceptState(token_len - 1)
+        nfa_object = NFA().startState(0).acceptState(token_len)
 
         for i in range(token_len):
-            if i != token_len - 1:
-                nfa_object.addTransitions(i, self.token[i], i + 1)
+            nfa_object.addTransitions(i, self.token[i], i + 1)
 
         return nfa_object
 
