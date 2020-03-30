@@ -1,42 +1,29 @@
 """
-classical BNF for expression
-expr->product ((+ ) expr)
-product->value ((* ) product)
-value->num | '('expr')'
 
-re-> star re | or re | value re
-star-> value '*'
-or->  value '|' or
-value -> sequence | '('re')'
+BNF for this parser
 
-
-the key lines in how you understand the grammar, then converts grammar to the parsing program.
-
-re-> value '*' re | value '|' OR  re| value re
-value-> sequence | '('re')'
-OR-> value | value '|' OR
-
-## get stuck here, oh, fuck!
+re-> '(' re* ')' |value '*' re | value '|' re | value re | '*' re | '|' re
+value-> sequence
 """
-from lexer import RE_SYMBOL, SEQUENCE, PARENTHESIS, LexicalAnalyzer
 
+from lexer import RE_SYMBOL, SEQUENCE, PARENTHESIS, LexicalAnalyzer
+from  nfa import NFA, mergeStar, mergeConcatenation, mergeOR
 
 INTERVAL_LEN = 5
 class SequenceAST():
     def __init__(self, token):
         self.token = token
 
-    def run(self):
-        ## todo
-        return self.token
+    def get_nfa(self):
+        token_len = len(self.token)
 
-    def get_print_len(self):
-        return len(self.token) + INTERVAL_LEN
+        nfa_object = NFA().startState(0).acceptState(token_len)
 
-    def get_childs(self):
-        childs = [self.token]
+        for i in range(token_len):
+            nfa_object.addTransitions(i, self.token[i], i + 1)
 
-        return childs
+        return nfa_object
+
     def __repr__(self):
         return self.token
 
@@ -44,8 +31,6 @@ class ReAST():
     def __init__(self):
         self.children = []
 
-    def get_childs(self):
-        return self.children
     def add (self, ast):
         self.children.append(ast)
         return self
@@ -53,15 +38,13 @@ class ReAST():
     def pop(self):
         child = self.children.pop()
         return child
-    def run(self):
-        pass
-
-    def get_print_len(self):
-        l = 0
+    def get_nfa(self):
+        child_nfa_list = []
         for child in self.children:
-            l += child.get_print_len()
-        return l
+            child_nfa = child.get_nfa()
+            child_nfa_list.append(child_nfa)
 
+        return mergeConcatenation(child_nfa_list)
     def __repr__(self):
         ans = [child.__repr__() for child in self.children]
         return "".join(ans)
@@ -69,15 +52,10 @@ class ReAST():
 class StarAST():
     def __init__(self, ast):
         self.child = ast
-    def get_print_len(self):
-        l = 0
-        return  self.child.get_print_len() + 1
 
-    def get_childs(self):
-        return [self.child, "*"]
-
-    def run(self):
-        pass
+    def get_nfa(self):
+        child_nfa = self.child.get_nfa()
+        return mergeStar(child_nfa)
 
     def __repr__(self):
         if isinstance(self.child, SequenceAST):
@@ -92,15 +70,15 @@ class OrAST():
     def add(self, ast):
         self.childs.append(ast)
 
-    def get_childs(self):
-        childs = []
-        for i in range(len(self.childs)):
-            childs.append(self.childs[i])
+    def get_nfa(self):
+        child_nfa_list = []
 
-            if i != len(self.childs) - 1:
-                childs.append("|")
+        for child in self.childs:
+            child_nfa = child.get_nfa()
+            child_nfa_list.append(child_nfa)
 
-        return childs
+        return mergeOR(child_nfa_list)
+
     def __repr__(self):
         ans = ["("]
         for i in range(len(self.childs)):
@@ -114,83 +92,139 @@ class OrAST():
     def run(self):
         pass
 
-    def get_print_len(self):
-        l = 0
-        for child in self.childs:
-            l += child.get_print_len()
 
-        l += (len(self.childs) - 1)
-
-        return l
 
 STAR = "*"
 OR_SYMBOL = "|"
+
+
+
 class ReParser():
-    def __init__(self ):
-        self.valueParser = None
-        self.reTree = None
-
-    def setReTree(self, reTree ):
-        self.reTree = reTree
-
+    def __init__(self , valueParser = None):
+        self.valueParser = valueParser
+        self.reAST = ReAST()
 
     def parse(self,lex):
         token = lex.peak()
+        ##s = "((faf)*)*"
+        if token.type == PARENTHESIS:
+            left = lex.nextToken()
+            assert left.value == "("
 
-        if token == None:
-            return self.valueParser.parse(lex)
-        elif token.value == STAR:
-            lex.nextToken()
-            lastRe= self.reTree.pop()
-            starAST = StarAST(lastRe)
+            childReParser = ReParser(self.valueParser)
+
+            childReParser.parse(lex)
+            right = lex.peak()
+
+            while right != None and right.value != ")":
+                childReParser.parse(lex)
+                right = lex.peak()
+
+            right  = lex.nextToken()
+            if right == None:
+                raise ValueError("invalid syntax")
+            assert right.value == ")"
+
+            tree = childReParser.reAST
+            self.reAST.add(tree)
+            return tree
+        elif token.value == "|":
+            left = self.reAST.pop()
+
+            symnbol = lex.nextToken()
+            assert  symnbol.value == "|"
+            right = ReParser(self.valueParser).parse(lex)
+            orAst = OrAST()
+            orAst.add(left)
+            orAst.add(right)
+            self.reAST.add(orAst)
+
+            return orAst
+        elif token.value == "*":
+            star = self.reAST.pop()
+
+            symbol = lex.nextToken()
+            assert symbol.value == "*"
+
+            starAst = StarAST(star)
+            self.reAST.add(starAst)
+
+            return starAst
+
+
+        token1 = lex.peak(1)
+        if token1 == None:
+            tree = self.valueParser.parse(lex)
+
+            self.reAST.add(tree)
+            return tree
+
+        elif token1.value == "*":
+            tree = self.valueParser.parse(lex)
+            star = lex.nextToken()
+            assert  star.value == "*"
+            starAST = StarAST(tree)
+
+            self.reAST.add(starAST)
+
             return starAST
+        elif token1.value == "|":
+            left = self.valueParser.parse(lex)
+            orSymbol = lex.nextToken()
+            assert  orSymbol.value == "|"
+            right = ReParser(self.valueParser).parse(lex)
 
-        elif token.value == OR_SYMBOL:
-            lex.nextToken()
-            firstInOr = self.reTree.pop()
-            secondInOr = self.parse(lex)
-            orRe = OrAST()
-            orRe.add(firstInOr)
-            orRe.add(secondInOr)
+            orAst = OrAST()
+            orAst.add(left)
+            orAst.add(right)
 
-            return  orRe
+            self.reAST.add(orAst)
+            return orAst
+
         else:
             seqRe = self.valueParser.parse(lex)
-            return  seqRe
+
+            self.reAST.add(seqRe)
+            return seqRe
+
+class OrParser():
+
+    def __init__(self, valueParser):
+        self.valueParser =valueParser
+
+    def parse(self, lex):
+        left = self.valueParser.parse(lex)
+        token = lex.peak()
+        if token.value == "*":
+            lex.nextToken()
+            starAST = StarAST(left)
+            return starAST
+        if token.value != "|":
+            return left
+
+        orSymbol = self.lex.nextToken()
+        assert  orSymbol.value == "|"
+        right = self.parse(lex)
+
+        orAST = OrAST()
+        orAST.add(left), orAST.add(right)
+
+        return orAST
+
 
 class ValueParser():
-    def __init__(self, reParser):
-        self.re_parser=  reParser
-
+    def __init__(self ):
+        pass
     def parse(self, lex):
         token = lex.peak()
         if token.type == SEQUENCE:
             token = lex.nextToken()
             return SequenceAST(token.value)
-
-        elif token.type == PARENTHESIS:
-            left = lex.nextToken()
-            assert left.value == "("
-            ## todo my grammar is not understandable right now
-            while lex.hasNext() and lex.peak().value != ")":
-                tree = self.re_parser.parse(lex)
-            if not lex.hasNext():
-                raise ValueError("syntax, error")
-            right = lex.nextToken()
-            assert right.value == ")"
-            return tree
-
         else:
-            raise ValueError("invalid input")
+            raise ValueError("invalid input|it is not a sequence token|token={0}", token)
 
 
-"""
-my BNF still has a problem 
 
-re->  '*' re | '|' re | value re
-value -> sequence | '('re')'
-
-"""
 
 class ParserEngine():
     def __init__(self):
@@ -201,13 +235,11 @@ class ParserEngine():
         lexx.run(input)
 
         reParser = ReParser()
-        valueParser = ValueParser(reParser)
+        valueParser = ValueParser()
+
         reParser.valueParser = valueParser
-        tree = ReAST()
-        reParser.setReTree(tree)
+
 
         while lexx.hasNext():
-            subTree = reParser.parse(lexx)
-            tree.add(subTree)
-        return tree
-
+             reParser.parse(lexx)
+        return reParser.reAST
