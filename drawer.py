@@ -24,6 +24,8 @@ class NFALayout():
         self.x0 = 50
         self.y0 = 50
 
+        self.curved_height = 50
+
         self.nfa = nfa
         self.width = None
         self.depth = None
@@ -76,13 +78,20 @@ class NFALayout():
         for key, value in self.nfa.transitions.items():
             q1, s = key[0], key[1]
             for q2 in value:
-
                 q1_x, q1_y = self.positions[q1]
                 q2_x, q2_y = self.positions[q2]
-
-                ans.append([q1_x + self.radius, q1_y, q2_x - self.radius, q2_y, s])
-
+                type = self.get_transition_draw_type(q1, q2)
+                if type == "line":
+                    ans.append([q1_x + self.radius, q1_y, q2_x - self.radius, q2_y, s, type])
+                else:
+                    ans.append([q2_x, q2_y - 2*self.radius, q1_x, q1_y - 2*self.radius + self.curved_height, s, type])
         return ans
+
+    def get_transition_draw_type(self,q1, q2):
+        if q1 < q2:
+            return "line"
+        return "arc"
+
 
 class NFADrawer():
     def __init__(self):
@@ -101,12 +110,14 @@ class NFADrawer():
 
 
     def drawTransitions(self, draw, nfa_layout):
-        for q1_x, q1_y, q2_x, q2_y, s in nfa_layout.get_transition_position():
-            self.__draw_new_right_arrow(draw, q1_x, q1_y, q2_x, q2_y, s)
+        for q1_x, q1_y, q2_x, q2_y, s , type in nfa_layout.get_transition_position():
+            if type == "line":
+                self.__draw_new_right_arrow(draw, q1_x, q1_y, q2_x, q2_y, s)
+            else:
+                self.__drawArc(draw,  q1_x, q1_y, q2_x, q2_y)
 
-    ## todo when to draw the arc
-    def drawArc(self, draw, x1, y1, x2, y2):
-        draw.arc((x1, y1, x2, y2), start=0, end=300, fill='black', width=3)
+    def __drawArc(self, draw, x1, y1, x2, y2):
+        draw.arc((x1, y1, x2, y2), start=180, end=0, fill='black', width=1)
 
     def __draw_new_right_arrow(self, draw, x1, y1, x2, y2, symbol):
         draw.line((x1, y1, x2, y2), fill=(0, 0, 0), width=1)
