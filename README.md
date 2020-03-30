@@ -15,8 +15,11 @@ input = "(0|1)*111"
 convertREtoNFA(input)
 ```
 
+# Pictures of NFA
+![image](https://github.com/wenbinhuang9/RE-to-NFA/blob/master/new_nfa_draw.jpg)
 
 # Issues to fix
 
 1. drawing line for star transition
 2. adding a drawing arrow function
+
