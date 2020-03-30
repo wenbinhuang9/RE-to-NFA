@@ -8,4 +8,4 @@ This project is to parse the regular expression to NFA(non-determinism finite au
 Alice->Bob: Hello Bob, how are you ?
 Note right of Bob: Bob thinks
 Bob-->Alice: I am good thanks!
-` ``
+```
