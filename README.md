@@ -16,6 +16,7 @@ convertREtoNFA(input)
 ```
 
 # Pictures of NFA
+NFA as follows is from 'cd|eff|ab'
 ![image](https://github.com/wenbinhuang9/RE-to-NFA/blob/master/new_nfa_draw.jpg)
 
 # Issues to fix
