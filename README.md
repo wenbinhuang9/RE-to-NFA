@@ -22,5 +22,5 @@ NFA as follows is from 'cd|eff|ab'
 # Issues to fix
 
 1. drawing line for star transition
-2. adding a drawing arrow function
+2. adding a drawing arrow function, which can flexibly adjust the arrow angle.
 
