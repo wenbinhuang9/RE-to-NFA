@@ -1,19 +1,18 @@
 
 from PIL import Image, ImageDraw
-
-from nfa import NFA
+from  math import  cos, sin
 
 """
 1. calculate position(width, depth)for each state 
 2. draw position
 3. draw transition(according position)
 
-todo 
-1. todo how to draw the star here??? 
 """
 
-## generate NFA layout here, that is calculate position for each NFA automatically
 
+
+
+## generate NFA layout here, that is calculate position for each NFA automatically
 class NFALayout():
     def __init__(self, nfa):
         self.radius = 20
@@ -115,27 +114,54 @@ class NFADrawer():
     def drawTransitions(self, draw, nfa_layout):
         for q1_x, q1_y, q2_x, q2_y, s ,type in nfa_layout.get_transition_position():
             if type == "line":
-                self.__draw_new_right_arrow(draw, q1_x, q1_y, q2_x, q2_y, s)
+                self.__draw_arrow_and_text(draw, q1_x, q1_y, q2_x, q2_y, s)
             else:
                 self.__drawArc(draw, q1_x, q1_y, q2_x, q2_y)
     def __drawArc(self, draw, x1, y1, x2, y2):
         draw.arc((x1, y1, x2, y2), start=180, end=0, fill='black', width=1)
 
-    def __draw_new_right_arrow(self, draw, x1, y1, x2, y2, symbol):
+    def __draw_arrow_and_text(self, draw, x1, y1, x2, y2, symbol):
 
-        draw.line((x1, y1, x2, y2), fill=(0, 0, 0), width=1)
+        self.draw_arrow(draw, x1, y1, x2, y2)
 
         mid_x = (x1 + x2) / 2
         mid_y = (y1 + y2)/ 2 + 10
         self.__draw_symbol(draw,mid_x, mid_y, symbol)
 
+
+
+    def __nomalization(self, dx, dy):
+        absolute = abs(dx) if abs(dx) > abs(dy) else abs(dy)
+
+        if dx == 0:
+            return (0, dy/(abs(dy)) * 10)
+
+        if dy == 0:
+            return (dx/abs(dx) * 10, 0)
+
+        return (dx / (absolute + 0.0) * 10, dy / (absolute + 0.0) * 10)
+
+    def draw_arrow(self, draw, x1, y1, x2, y2):
+        draw.line((x1, y1, x2, y2), fill=(0, 0, 0), width=1)
+
+        dx = x1 - x2
+        dy = y1 - y2
+        dx, dy =  self.__nomalization(dx, dy)
+        cos = 0.866
+        sin = 0.500
+
+
         ### draw arrow
         end_x, end_y = x2, y2
-        upper_arrow_x, upperarrow_y = end_x - 10, y2 + 10
-        lower_arrow_x, lower_arrow_y = end_x - 10, y2 - 10
+        upper_arrow_x, upperarrow_y = end_x + dx * cos - dy * sin, end_y + dx * sin + dy * cos
+
+        lower_arrow_x, lower_arrow_y = end_x + dx * cos + dy * sin, end_y + dx * (-sin) + dy * cos
 
         draw.line((upper_arrow_x, upperarrow_y, end_x, end_y), fill=(0, 0, 0), width=1)
         draw.line((lower_arrow_x, lower_arrow_y, end_x, end_y), fill=(0, 0, 0), width=1)
+
+
+
 
     def drawNewNFA(self, nfa_layout):
         width, depth = nfa_layout.pic_width, nfa_layout.pic_depth
@@ -147,7 +173,7 @@ class NFADrawer():
 
         self.drawTransitions(draw, nfa_layout)
 
-        im.save('./new_nfa_draw.jpg', quality=95)
+        im.save('./new_nfa_draw.jpg',  format='JPEG', subsampling=0, quality=95)
 
     def __draw_symbol(self, draw, x, y, str_text):
         draw.text((x, y), str_text, fill="black")

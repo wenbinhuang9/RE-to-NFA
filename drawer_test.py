@@ -3,12 +3,11 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 from  parser import  SequenceAST, OrAST
-from  nfa import  NFA
+from nfa import  NFA
 from  drawer import  NFADrawer
 from drawer import  NFALayout
 from  nfa import mergeOR, mergeStar ,mergeConcatenation
 class MyTestCase(unittest.TestCase):
-
 
     def test_line(self):
         im = Image.new('RGB', (500, 300), (255, 255, 255))
