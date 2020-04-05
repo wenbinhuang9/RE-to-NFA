@@ -8,6 +8,12 @@ import  filecmp
 ## add assert, make it auto
 
 class MyTestCase(unittest.TestCase):
+    def test_or_engine0(self):
+        input = "a|b"
+        file = "a_b_or.jpg"
+        drawNFA(input, file)
+
+
 
     def test_or_engine(self):
         input = "cd|eff|(ab)*"

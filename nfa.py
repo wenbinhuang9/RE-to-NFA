@@ -1,4 +1,3 @@
-## definiton of nfa
 from collections import defaultdict
 
 EPSILON = "epsilon"

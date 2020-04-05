@@ -1,6 +1,8 @@
 
-from drawer import NFALayout, NFADrawer
+from drawer import  drawNewNFA
 from  parser import  ParserEngine
+from layout import  NFALayout
+
 def drawNFA(input, file = None):
     parserEngine = ParserEngine()
 
@@ -10,6 +12,4 @@ def drawNFA(input, file = None):
 
     nfa_layout = NFALayout(nfa)
 
-    drawer = NFADrawer()
-
-    drawer.drawNewNFA(nfa_layout, file )
+    drawNewNFA(nfa_layout, file )
