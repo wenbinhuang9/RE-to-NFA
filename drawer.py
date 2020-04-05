@@ -8,10 +8,6 @@ from  math import  cos, sin
 3. draw transition(according position)
 
 """
-
-
-
-
 ## generate NFA layout here, that is calculate position for each NFA automatically
 class NFALayout():
     def __init__(self, nfa):

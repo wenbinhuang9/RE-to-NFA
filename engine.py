@@ -1,8 +1,7 @@
 
 from drawer import NFALayout, NFADrawer
 from  parser import  ParserEngine
-## todo give a input convert it,and then draw NFA
-def convertREtoNFA(input):
+def drawNFA(input):
     parserEngine = ParserEngine()
 
     tree = parserEngine.run(input)

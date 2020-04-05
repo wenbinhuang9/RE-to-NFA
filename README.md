@@ -14,8 +14,8 @@ The basic idea as follows
 ```
 from  engine import convertREtoNFA
 
-input = "(0|1)*111"
-convertREtoNFA(input)
+re= "(0|1)*111"
+drawNFA(re)
 ```
 
 # Pictures of NFA
@@ -26,5 +26,3 @@ NFA of 'cd|eff|ab'
 # Issues to fix
 
 1. drawing line for star transition
-2. adding a drawing arrow function, which can flexibly adjust the arrow angle.
-
