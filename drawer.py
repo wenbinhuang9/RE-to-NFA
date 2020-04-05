@@ -160,7 +160,7 @@ class NFADrawer():
 
 
 
-    def drawNewNFA(self, nfa_layout):
+    def drawNewNFA(self, nfa_layout, file = None):
         width, depth = nfa_layout.pic_width, nfa_layout.pic_depth
 
         im = Image.new('RGB', (width, depth), (255, 255, 255))
@@ -170,7 +170,10 @@ class NFADrawer():
 
         self.drawTransitions(draw, nfa_layout)
 
-        im.save('./new_nfa_draw.jpg',  format='JPEG', subsampling=0, quality=95)
+        if file == None:
+            file ='./new_nfa_draw.jpg'
+
+        im.save(file ,  format='JPEG', subsampling=0, quality=95)
 
     def __draw_symbol(self, draw, x, y, str_text):
         draw.text((x, y), str_text, fill="black")

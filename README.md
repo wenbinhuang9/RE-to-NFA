@@ -12,7 +12,7 @@ The basic idea as follows
 
 # How to use
 ```
-from  engine import convertREtoNFA
+from  engine import drawNFA
 
 re= "(0|1)*111"
 drawNFA(re)

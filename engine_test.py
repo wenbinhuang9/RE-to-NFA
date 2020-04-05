@@ -4,14 +4,22 @@ from  engine import drawNFA
 
 import unittest
 
-
+import  filecmp
 ## add assert, make it auto
 
 class MyTestCase(unittest.TestCase):
-    ##todo add unite test
-    ## todo this part has a layout bug
+
     def test_or_engine(self):
-        input = "cd|(eff)*|(ab)*"
+        input = "cd|eff|(ab)*"
+        file = "cd_eff_ab_or.jpg"
+        correctfile = "cd_eff_ab_or_correct.jpg"
+        drawNFA(input, "cd_eff_ab_or.jpg")
+
+        self.assertEqual(filecmp.cmp(file, correctfile), True)
+
+    ## todo parsing bug here
+    def test_or_engine2(self):
+        input = "cd|eff|ab*"
 
         drawNFA(input)
 

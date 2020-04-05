@@ -8,6 +8,7 @@ re-> '(' re* ')' |value '*' re | value '|' re | value re | '*' re | '|' re
 value-> sequence
 """
 
+## todo reconsider the syntax design and lexical design
 from lexer import RE_SYMBOL, SEQUENCE, PARENTHESIS, LexicalAnalyzer
 from  nfa import NFA, mergeStar, mergeConcatenation, mergeOR
 
