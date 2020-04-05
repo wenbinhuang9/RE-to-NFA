@@ -68,7 +68,10 @@ class OrAST():
         self.childs = []
 
     def add(self, ast):
-        self.childs.append(ast)
+        if isinstance(ast, list):
+            self.childs.extend(ast)
+        else:
+            self.childs.append(ast)
 
     def get_nfa(self):
         child_nfa_list = []
@@ -134,9 +137,7 @@ class ReParser():
             symnbol = lex.nextToken()
             assert  symnbol.value == "|"
             right = ReParser(self.valueParser).parse(lex)
-            orAst = OrAST()
-            orAst.add(left)
-            orAst.add(right)
+            orAst = self.buildOrAst(left, right)
             self.reAST.add(orAst)
 
             return orAst
@@ -174,9 +175,7 @@ class ReParser():
             assert  orSymbol.value == "|"
             right = ReParser(self.valueParser).parse(lex)
 
-            orAst = OrAST()
-            orAst.add(left)
-            orAst.add(right)
+            orAst = self.buildOrAst(left, right)
 
             self.reAST.add(orAst)
             return orAst
@@ -186,6 +185,16 @@ class ReParser():
 
             self.reAST.add(seqRe)
             return seqRe
+
+    def buildOrAst(self, left, right):
+        orAST = OrAST()
+        orAST.add(left)
+        if isinstance(right, OrAST):
+            orAST.add(right.childs)
+        else:
+            orAST.add(right)
+
+        return orAST
 
 class OrParser():
 
@@ -206,9 +215,13 @@ class OrParser():
         assert  orSymbol.value == "|"
         right = self.parse(lex)
 
+        ## flatten the ORAST
         orAST = OrAST()
-        orAST.add(left), orAST.add(right)
-
+        orAST.add(left)
+        if isinstance(right, OrAST):
+            orAST.add(right.childs)
+        else:
+            orAST.add(right)
         return orAST
 
 
