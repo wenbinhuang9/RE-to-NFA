@@ -2,7 +2,10 @@
 This project is to parse the regular expression to NFA(non-determinism finite automaton), as the two are equivalent. 
 
 # Overveiw of Project Flow
-The basic idea is parse the regular expressiont to an abstract syntax tree. And then using the AST(abstract syntax tree) to generate NFA. Finally, comput the NFA layout and draw the NFA. 
+The basic idea as follows
+1. parse the regular expressiont to an abstract syntax tree
+2. using the AST(abstract syntax tree) to generate NFA
+3. Finally, compute the NFA layout and draw the NFA. 
 
 ![image](https://github.com/wenbinhuang9/RE-to-NFA/blob/master/flow.png)
 
