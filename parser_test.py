@@ -17,8 +17,13 @@ class MyTestCase(unittest.TestCase):
         print (tree)
 
 
+    def test_parser(self):
+        engine = ParserEngine()
 
+        s = "cd|(eff)*|(ab)*"
+        tree = engine.run(s)
 
+        print(tree)
 
 if __name__ == '__main__':
     unittest.main()

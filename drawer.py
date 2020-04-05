@@ -6,12 +6,12 @@ from  math import  cos, sin
 1. calculate position(width, depth)for each state 
 2. draw position
 3. draw transition(according position)
-
 """
+RADIUS = 20
 ## generate NFA layout here, that is calculate position for each NFA automatically
 class NFALayout():
     def __init__(self, nfa):
-        self.radius = 20
+        self.radius = RADIUS
         self.space_between_levels = 60
         self.space_adjacent_cycles = 40
 
@@ -93,8 +93,7 @@ class NFALayout():
 
 class NFADrawer():
     def __init__(self):
-        #by default now
-        self.r = 30
+        pass
 
     def drawPositions(self, draw, nfa_layout):
         for q in nfa_layout.positions:
@@ -113,9 +112,12 @@ class NFADrawer():
                 self.__draw_arrow_and_text(draw, q1_x, q1_y, q2_x, q2_y, s)
             else:
                 self.__drawArc(draw, q1_x, q1_y, q2_x, q2_y)
+
+
     def __drawArc(self, draw, x1, y1, x2, y2):
         draw.arc((x1, y1, x2, y2), start=180, end=0, fill='black', width=1)
 
+        self.__arrow(draw, x1, y1 + RADIUS * 2, 0, -10)
     def __draw_arrow_and_text(self, draw, x1, y1, x2, y2, symbol):
 
         self.draw_arrow(draw, x1, y1, x2, y2)
@@ -123,8 +125,6 @@ class NFADrawer():
         mid_x = (x1 + x2) / 2
         mid_y = (y1 + y2)/ 2 + 10
         self.__draw_symbol(draw,mid_x, mid_y, symbol)
-
-
 
     def __nomalization(self, dx, dy):
         absolute = abs(dx) if abs(dx) > abs(dy) else abs(dy)
@@ -137,18 +137,12 @@ class NFADrawer():
 
         return (dx / (absolute + 0.0) * 10, dy / (absolute + 0.0) * 10)
 
-    def draw_arrow(self, draw, x1, y1, x2, y2):
-        draw.line((x1, y1, x2, y2), fill=(0, 0, 0), width=1)
-
-        dx = x1 - x2
-        dy = y1 - y2
-        dx, dy =  self.__nomalization(dx, dy)
+    def __arrow(self, draw, end_x, end_y, dx, dy):
         cos = 0.866
         sin = 0.500
-
+        dx, dy =  self.__nomalization(dx, dy)
 
         ### draw arrow
-        end_x, end_y = x2, y2
         upper_arrow_x, upperarrow_y = end_x + dx * cos - dy * sin, end_y + dx * sin + dy * cos
 
         lower_arrow_x, lower_arrow_y = end_x + dx * cos + dy * sin, end_y + dx * (-sin) + dy * cos
@@ -156,6 +150,13 @@ class NFADrawer():
         draw.line((upper_arrow_x, upperarrow_y, end_x, end_y), fill=(0, 0, 0), width=1)
         draw.line((lower_arrow_x, lower_arrow_y, end_x, end_y), fill=(0, 0, 0), width=1)
 
+
+    def draw_arrow(self, draw, x1, y1, x2, y2):
+        draw.line((x1, y1, x2, y2), fill=(0, 0, 0), width=1)
+
+        dx = x1 - x2
+        dy = y1 - y2
+        self.__arrow(draw, x2, y2, dx, dy)
 
 
 

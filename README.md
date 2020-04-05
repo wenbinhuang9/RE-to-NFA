@@ -25,4 +25,6 @@ NFA of 'cd|eff|ab'
 
 # Issues to fix
 
-1. drawing line for star transition
+1. adding text for star transition
+2. cd | (eff)* | (ab)* this expression has a layout bug
+3.  cd | eff | ab*, this expression has a parsing bug  

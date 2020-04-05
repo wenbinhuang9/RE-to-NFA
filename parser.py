@@ -1,5 +1,7 @@
 """
 
+## todo This BNF has a little problem, using LL1 algorithm I have written???
+## todo refactor here !!!!
 BNF for this parser
 
 re-> '(' re* ')' |value '*' re | value '|' re | value re | '*' re | '|' re
@@ -32,7 +34,10 @@ class ReAST():
         self.children = []
 
     def add (self, ast):
-        self.children.append(ast)
+        if isinstance(ast, list):
+            self.children.extend(ast)
+        else:
+            self.children.append(ast)
         return self
 
     def pop(self):
@@ -107,7 +112,7 @@ class ReParser():
         self.valueParser = valueParser
         self.reAST = ReAST()
 
-    def parse(self,lex):
+    def parse(self, lex):
         token = lex.peak()
         ##s = "((faf)*)*"
         if token.type == PARENTHESIS:
@@ -127,9 +132,17 @@ class ReParser():
             if right == None:
                 raise ValueError("invalid syntax")
             assert right.value == ")"
+            right = lex.peak()
 
-            tree = childReParser.reAST
-            self.reAST.add(tree)
+            if right.value == "*":
+                lex.nextToken()
+                tree = StarAST(childReParser.reAST)
+            else:
+                tree = childReParser.reAST
+            if isinstance(tree, ReAST):
+                self.reAST.add(tree.children)
+            else:
+                self.reAST.add(tree)
             return tree
         elif token.value == "|":
             left = self.reAST.pop()
