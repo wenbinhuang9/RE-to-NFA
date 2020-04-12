@@ -17,11 +17,12 @@ class MyTestCase(unittest.TestCase):
 
     def test_or_engine(self):
         input = "cd|eff|(ab)*"
-        file = "cd_eff_ab_or.jpg"
-        correctfile = "cd_eff_ab_or_correct.jpg"
-        drawNFA(input, "cd_eff_ab_or.jpg")
+        file = "cd_eff_ab_or"
+        svgfile = file + ".svg"
+        correctfile = "cd_eff_ab_or_correct.svg"
+        drawNFA(input, "cd_eff_ab_or")
 
-        self.assertEqual(filecmp.cmp(file, correctfile), True)
+        self.assertEqual(filecmp.cmp(svgfile, correctfile), True)
 
     ## todo parsing bug here
     def test_or_engine2(self):
@@ -39,5 +40,14 @@ class MyTestCase(unittest.TestCase):
         input = "1*"
 
         drawNFA(input)
+
+  ## todo parsing bug here
+    def test_or_engine10(self):
+        input = "cd|ef|ab"
+
+        drawNFA(input, "test_or_engine10")
+
+    def test_special_char(self):
+        print(chr(945))
 if __name__ == '__main__':
     unittest.main()

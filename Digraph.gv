@@ -1,0 +1,7 @@
+digraph {
+	graph [rankdir=LR]
+	00
+	01 [peripheries=2]
+	00 -> 01 [label=1]
+	01 -> 00 [label=epsilon]
+}
