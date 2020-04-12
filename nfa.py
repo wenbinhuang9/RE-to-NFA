@@ -52,7 +52,8 @@ class NFA():
             self.__append_single(nfa)
 
         return self
-
+    def addSingle(self, nfa):
+        return self.__append_single(nfa)
     def __append_single(self, nfa):
         self.transitions.update(nfa.transitions)
         self.state_out.update(nfa.state_out)

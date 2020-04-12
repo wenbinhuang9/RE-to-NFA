@@ -46,7 +46,7 @@ class LexicalAnalyzer():
     def peak(self, index = 0):
         if index >= len(self.tokens):
             return None
-        return  self.tokens[index]
+        return  self.tokens[index].text()
 
     def add_token(self, s):
         if s.strip() == "":

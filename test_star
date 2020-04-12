@@ -1,0 +1,7 @@
+digraph {
+	graph [rankdir=LR]
+	q1 [peripheries=2]
+	q1 -> q1 [label=a]
+	q0
+	q0 -> q1 [label=<&lambda;>]
+}
