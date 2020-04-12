@@ -7,7 +7,7 @@ class MyTestCase(unittest.TestCase):
         analyzer = LexicalAnalyzer()
         s = "abcde"
         analyzer.run(s)
-        ans = ["abcde"]
+        ans = [c for c in s]
         tokens = analyzer.tokens
 
         self.assertEqual(all( [ans[i] == tokens[i].value for i in range(len(ans))]), True)
@@ -18,7 +18,7 @@ class MyTestCase(unittest.TestCase):
         analyzer
         analyzer.run(s)
 
-        ans = ["ab", "|", "bb"]
+        ans = [c for c in "ab|bb"]
 
         tokens = analyzer.tokens
         print(tokens)
@@ -29,7 +29,7 @@ class MyTestCase(unittest.TestCase):
         s = "(a | bb)* abb"
         analyzer.run(s)
 
-        ans = ["(", "a", "|", "bb", ")", "*", "abb"]
+        ans = [c for c in "(a|bb)*abb"]
 
         tokens = analyzer.tokens
         print(tokens)

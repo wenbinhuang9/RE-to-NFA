@@ -6,6 +6,25 @@ BNF for this parser
 
 re-> '(' re* ')' |value '*' re | value '|' re | value re | '*' re | '|' re
 value-> sequence
+
+# think about precedence  () * |
+# a*|b*|c*
+
+
+## todo the key is to define BNF for regular expression
+re-> seq | '|' seq
+seq -> seq | seq*
+seq-> char| char seq | (re) | epsilon
+"""
+
+"""
+aab | bba 
+
+## todo finish it today , is this be solved by LL algorithm? 
+<re> ::=  <term> '|' <re> | <term>
+<term> ::= { <factor> }
+<factor> ::= <base> {'*'}
+<base> ::= <char> | '(' <re> ')'
 """
 
 ## todo reconsider the syntax design and lexical design

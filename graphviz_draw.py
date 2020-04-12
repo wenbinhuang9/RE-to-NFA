@@ -2,6 +2,7 @@ from  nfa import NFA
 
 import  graphviz as gv
 
+## todo adding flag for start state
 from nfa import EPSILON
 LAMBDA = "<&lambda;>"
 class NFAGraph():

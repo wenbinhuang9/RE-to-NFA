@@ -9,8 +9,4 @@ def drawNFA(input, file = None):
 
     nfa = tree.get_nfa()
 
-   # nfa_layout = NFALayout(nfa)
-
-   # drawNewNFA(nfa_layout, file )
-
     drawGraphNFA(nfa, file)

@@ -11,6 +11,9 @@ class Token():
 
     def value(self):
         return self.value
+
+    def text(self):
+        return  self.value
     def __repr__(self):
         return "type={0},value={1}".format(self.type, self.value)
     def __str__(self):
@@ -19,7 +22,7 @@ class Token():
 class LexicalAnalyzer():
     def __init__(self):
         self.tokens = []
-        self.reg = "([0-9a-zA-Z]+|\||\*|\(|\)|\s)"
+        self.reg = "([0-9a-zA-Z]|\||\*|\(|\)|\s)"
         self.pattern = re.compile(self.reg)
         self.re_symbol = set(['|', '*'])
         self.parenthesis = set(['(', ')'])
@@ -27,6 +30,12 @@ class LexicalAnalyzer():
     def hasNext(self):
         return  len(self.tokens) > 0
 
+    def eat(self, c):
+        token = self.nextToken()
+        assert token.value == c
+
+    def more(self):
+        return  len(self.tokens) > 0
     def nextToken(self):
 
         token = self.tokens[0]

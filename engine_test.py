@@ -31,9 +31,10 @@ class MyTestCase(unittest.TestCase):
         drawNFA(input)
 
     def test_or_stat_concatenation_engine(self):
+        ## todo this graph is too complex
         input = "(0|1)*111"
-
-        drawNFA(input)
+        file = "end_with_111"
+        drawNFA(input, file)
 
 
     def test_starr(self):
