@@ -1,42 +1,82 @@
 import unittest
 
 
-from parser import  ParserEngine
-## todo the problem right now lies in I embed my print code into the parser, how to deperate it?
+from  lexer import  LexicalAnalyzer
 
+from  parser import  RegExParser
 class MyTestCase(unittest.TestCase):
-    def test_parser(self):
-        engine = ParserEngine()
+    def test_primitive_parser(self):
+        re = "a"
+        l = LexicalAnalyzer()
+        l.run(re)
 
-        #s = "abfda*|fadf|faf|(fadfas)"
-        ## todo these two case will fail
-        #s = "((FADSF|faf|fa)*fa*|fad*)*"
-        #s = "(a|b)*abb|cd|ef|hi*"
-        s = "((a|b)*|(a|b)*)*"
-        tree = engine.run(s)
-        print (tree)
+        parser = RegExParser(l)
+        tree = parser.regex()
 
-
-    def test_parser1(self):
-        engine = ParserEngine()
-
-        s = "cd|eff|(ab)*"
-        tree = engine.run(s)
-
-        tree_repr = tree.__repr__()
-
-        self.assertEqual(tree_repr[1:-1] == s, True)
-
-
-    ## todo here has parsing problem
-    ## todo
-    def test_parser2(self):
-        engine = ParserEngine()
-
-        s = "cd|eff|ab*"
-
-        tree = engine.run(s)
         print(tree)
+
+        self.assertEqual(tree.__repr__() == re, True)
+
+    def test_concatenation_parser(self):
+        re = "abc"
+        l = LexicalAnalyzer()
+        l.run(re)
+
+        parser = RegExParser(l)
+        tree = parser.regex()
+
+        print(tree)
+
+        self.assertEqual(tree.__repr__() == re, True)
+
+
+    def test_or_parser(self):
+        re = "a|b|c"
+        l = LexicalAnalyzer()
+        l.run(re)
+
+        parser = RegExParser(l)
+        tree = parser.regex()
+
+        print(tree)
+
+        self.assertEqual(tree.__repr__() == re, True)
+
+
+    def test_star_parser(self):
+        re = "a**"
+        l = LexicalAnalyzer()
+        l.run(re)
+
+        parser = RegExParser(l)
+        tree = parser.regex()
+
+        print(tree)
+        self.assertEqual(tree.__repr__() == re, True)
+
+
+    def test_combination_parser(self):
+        re = "a|b*|(cd)*e"
+        l = LexicalAnalyzer()
+        l.run(re)
+
+        parser = RegExParser(l)
+        tree = parser.regex()
+
+        print(tree)
+        self.assertEqual(tree.__repr__() == re, True)
+
+    def test_combination1_parser(self):
+        re = "(0|1)*010"
+        l = LexicalAnalyzer()
+        l.run(re)
+
+        parser = RegExParser(l)
+        tree = parser.regex()
+
+        print(tree)
+        self.assertEqual(tree.__repr__() == re, True)
+
 
 if __name__ == '__main__':
     unittest.main()

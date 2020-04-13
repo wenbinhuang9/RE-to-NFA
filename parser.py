@@ -1,92 +1,130 @@
-"""
 
-## todo This BNF has a little problem, using LL1 algorithm I have written???
-## todo refactor here !!!!
-BNF for this parser
-
-re-> '(' re* ')' |value '*' re | value '|' re | value re | '*' re | '|' re
-value-> sequence
-
-# think about precedence  () * |
-# a*|b*|c*
-
-
-## todo the key is to define BNF for regular expression
-re-> seq | '|' seq
-seq -> seq | seq*
-seq-> char| char seq | (re) | epsilon
-"""
 
 """
-aab | bba 
-
-## todo finish it today , is this be solved by LL algorithm? 
 <re> ::=  <term> '|' <re> | <term>
 <term> ::= { <factor> }
 <factor> ::= <base> {'*'}
 <base> ::= <char> | '(' <re> ')'
 """
 
-## todo reconsider the syntax design and lexical design
-from lexer import RE_SYMBOL, SEQUENCE, PARENTHESIS, LexicalAnalyzer
-from  nfa import NFA, mergeStar, mergeConcatenation, mergeOR
+from nfa import NFA, EPSILON
 
-INTERVAL_LEN = 5
-class SequenceAST():
-    def __init__(self, token):
-        self.token = token
+class RegExParser():
+    def __init__(self, lexer):
+        self.lexer = lexer
+    def regex(self):
+        term_v = self.term()
 
-    def get_nfa(self):
-        token_len = len(self.token)
+        if (self.lexer.more() and self.lexer.peak() == "|"):
+            self.lexer.eat("|")
+            re_v  = self.regex()
 
-        nfa_object = NFA().startState(0).acceptState(token_len)
-
-        for i in range(token_len):
-            nfa_object.addTransitions(i, self.token[i], i + 1)
-
-        return nfa_object
-
-    def __repr__(self):
-        return self.token
-
-class ReAST():
-    def __init__(self):
-        self.children = []
-
-    def add (self, ast):
-        if isinstance(ast, list):
-            self.children.extend(ast)
+            return OrAST().add([term_v, re_v])
         else:
-            self.children.append(ast)
-        return self
+            return term_v
 
-    def pop(self):
-        child = self.children.pop()
-        return child
-    def get_nfa(self):
-        child_nfa_list = []
-        for child in self.children:
-            child_nfa = child.get_nfa()
-            child_nfa_list.append(child_nfa)
+    """
+    <re> ::=  <term> '|' <re> | <term>
+    <term> ::= { <factor> }
+    <factor> ::= <base> {'*'}
+    <base> ::= <char> | '(' <re> ')'
+    """
+    def term(self):
+        seq = SequenceAST()
+        while self.lexer.more() and self.lexer.peak()!= ')' and self.lexer.peak() != '|':
+            factor_v = self.factor()
+            seq.add(factor_v)
 
-        return mergeConcatenation(child_nfa_list)
+        return seq
+
+    def factor(self):
+        base_v =self.base()
+
+        while self.lexer.more() and self.lexer.peak() == '*':
+            self.lexer.eat("*")
+            v = StarAST(base_v)
+            base_v = v
+
+        return base_v
+    def base(self):
+        if self.lexer.peak() == "(":
+            self.lexer.eat("(")
+            re_v = self.regex()
+            self.lexer.eat(")")
+            return  re_v
+
+        else:
+            return Primitive(self.lexer.nextToken().text())
+
+class Primitive():
+    def __init__(self, c):
+        self.c = c
+
+    def text(self):
+        return self.c
+
     def __repr__(self):
-        ans = [child.__repr__() for child in self.children]
-        return "".join(ans)
-
+        return self.c
 class StarAST():
     def __init__(self, ast):
         self.child = ast
 
-    def get_nfa(self):
-        child_nfa = self.child.get_nfa()
-        return mergeStar(child_nfa)
+    def get_nfa(self, idgenerator):
+
+        start = idgenerator.nextID()
+        accept =start
+        root_nfa = NFA().acceptState(accept).startState(start)
+
+        if isinstance(self.child, Primitive):
+            root_nfa.addTransitions(start, self.child.text(), start)
+        else:
+            sub_nfa = self.child.get_nfa(idgenerator)
+
+            root_nfa.addSingle(sub_nfa)
+            root_nfa.addTransitions(start, EPSILON, sub_nfa.start)
+            root_nfa.addTransitions(sub_nfa.accept, EPSILON, accept)
+
+        return root_nfa
 
     def __repr__(self):
-        if isinstance(self.child, SequenceAST):
+        if isinstance(self.child, SequenceAST) or isinstance(self.child, OrAST):
+            return "".join(["(", self.child.__repr__(), ")", "*"])
+        else:
+
             return "".join([ self.child.__repr__(), "*"])
 
-        return "".join(["(", self.child.__repr__(), ")", "*"])
+
+class SequenceAST():
+    def __init__(self):
+        self.childs = []
+
+    def add(self, c):
+        self.childs.append(c)
+
+        return self
+    def get_nfa(self, idgenerator):
+        start = idgenerator.nextID()
+        nfa_v = NFA().startState(start)
+
+        cur_state = nfa_v.start
+        for c in self.childs:
+            if isinstance(c, Primitive):
+                next_state = idgenerator.nextID()
+                nfa_v.addTransitions(cur_state, c.text(), next_state)
+                cur_state = next_state
+
+            else:
+                sub_nfa = c.get_nfa(idgenerator)
+                nfa_v.addTransitions(cur_state, EPSILON, sub_nfa.start)
+                cur_state = sub_nfa.accept
+                nfa_v.addSingle(sub_nfa)
+
+        nfa_v.acceptState(cur_state)
+        return nfa_v
+
+    def __repr__(self):
+        return "".join([c.__repr__() for c in self.childs])
+
 
 class OrAST():
     def __init__(self):
@@ -98,194 +136,38 @@ class OrAST():
         else:
             self.childs.append(ast)
 
-    def get_nfa(self):
-        child_nfa_list = []
+        return self
 
-        for child in self.childs:
-            child_nfa = child.get_nfa()
-            child_nfa_list.append(child_nfa)
+    def get_nfa(self, idgenerator):
+        left = self.childs[0]
+        right = self.childs[1]
 
-        return mergeOR(child_nfa_list)
+        left_nfa = left.get_nfa(idgenerator)
+        right_nfa = right.get_nfa(idgenerator)
+
+        start, accept = idgenerator.nextID(), idgenerator.nextID()
+
+        root_nfa = NFA().startState(start).acceptState(accept)
+
+        root_nfa.append([left_nfa, right_nfa])
+
+        for  sub_nfa in [left_nfa, right_nfa]:
+            root_nfa.addTransitions(start, EPSILON, sub_nfa.start)
+            root_nfa.addTransitions(sub_nfa.accept, EPSILON, accept)
+
+        return root_nfa
+
+
 
     def __repr__(self):
-        ans = ["("]
+        ans = []
         for i in range(len(self.childs)):
             ans.append(self.childs[i].__repr__())
 
             if i != len(self.childs) - 1:
                 ans.append("|")
-        ans.append(")")
+
         return "".join(ans)
 
     def run(self):
         pass
-
-
-
-STAR = "*"
-OR_SYMBOL = "|"
-
-
-
-class ReParser():
-    def __init__(self , valueParser = None):
-        self.valueParser = valueParser
-        self.reAST = ReAST()
-
-    def parse(self, lex):
-        token = lex.peak()
-        ##s = "((faf)*)*"
-        if token.type == PARENTHESIS:
-            left = lex.nextToken()
-            assert left.value == "("
-
-            childReParser = ReParser(self.valueParser)
-
-            childReParser.parse(lex)
-            right = lex.peak()
-
-            while right != None and right.value != ")":
-                childReParser.parse(lex)
-                right = lex.peak()
-
-            right  = lex.nextToken()
-            if right == None:
-                raise ValueError("invalid syntax")
-            assert right.value == ")"
-            right = lex.peak()
-
-            if right.value == "*":
-                lex.nextToken()
-                tree = StarAST(childReParser.reAST)
-            else:
-                tree = childReParser.reAST
-            if isinstance(tree, ReAST):
-                self.reAST.add(tree.children)
-            else:
-                self.reAST.add(tree)
-            return tree
-        elif token.value == "|":
-            left = self.reAST.pop()
-
-            symnbol = lex.nextToken()
-            assert  symnbol.value == "|"
-            right = ReParser(self.valueParser).parse(lex)
-            orAst = self.buildOrAst(left, right)
-            self.reAST.add(orAst)
-
-            return orAst
-        elif token.value == "*":
-            star = self.reAST.pop()
-
-            symbol = lex.nextToken()
-            assert symbol.value == "*"
-
-            starAst = StarAST(star)
-            self.reAST.add(starAst)
-
-            return starAst
-
-
-        token1 = lex.peak(1)
-        if token1 == None:
-            tree = self.valueParser.parse(lex)
-
-            self.reAST.add(tree)
-            return tree
-
-        elif token1.value == "*":
-            tree = self.valueParser.parse(lex)
-            star = lex.nextToken()
-            assert  star.value == "*"
-            starAST = StarAST(tree)
-
-            self.reAST.add(starAST)
-
-            return starAST
-        elif token1.value == "|":
-            left = self.valueParser.parse(lex)
-            orSymbol = lex.nextToken()
-            assert  orSymbol.value == "|"
-            right = ReParser(self.valueParser).parse(lex)
-
-            orAst = self.buildOrAst(left, right)
-
-            self.reAST.add(orAst)
-            return orAst
-
-        else:
-            seqRe = self.valueParser.parse(lex)
-
-            self.reAST.add(seqRe)
-            return seqRe
-
-    def buildOrAst(self, left, right):
-        orAST = OrAST()
-        orAST.add(left)
-        if isinstance(right, OrAST):
-            orAST.add(right.childs)
-        else:
-            orAST.add(right)
-
-        return orAST
-
-class OrParser():
-
-    def __init__(self, valueParser):
-        self.valueParser =valueParser
-
-    def parse(self, lex):
-        left = self.valueParser.parse(lex)
-        token = lex.peak()
-        if token.value == "*":
-            lex.nextToken()
-            starAST = StarAST(left)
-            return starAST
-        if token.value != "|":
-            return left
-
-        orSymbol = self.lex.nextToken()
-        assert  orSymbol.value == "|"
-        right = self.parse(lex)
-
-        ## flatten the ORAST
-        orAST = OrAST()
-        orAST.add(left)
-        if isinstance(right, OrAST):
-            orAST.add(right.childs)
-        else:
-            orAST.add(right)
-        return orAST
-
-
-class ValueParser():
-    def __init__(self ):
-        pass
-    def parse(self, lex):
-        token = lex.peak()
-        if token.type == SEQUENCE:
-            token = lex.nextToken()
-            return SequenceAST(token.value)
-        else:
-            raise ValueError("invalid input|it is not a sequence token|token={0}", token)
-
-
-
-
-class ParserEngine():
-    def __init__(self):
-        pass
-
-    def run(self, input):
-        lexx = LexicalAnalyzer()
-        lexx.run(input)
-
-        reParser = ReParser()
-        valueParser = ValueParser()
-
-        reParser.valueParser = valueParser
-
-
-        while lexx.hasNext():
-             reParser.parse(lexx)
-        return reParser.reAST

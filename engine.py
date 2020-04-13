@@ -1,18 +1,11 @@
 
-from  parser import  ParserEngine
+
 
 from  lexer import  LexicalAnalyzer
 from graphviz_draw import  drawGraphNFA
-from new_parser import RegExParser
+from parser import RegExParser
 from  idgen import  IDGenerator
-def drawNFA(input, file = None):
-    parserEngine = ParserEngine()
 
-    tree = parserEngine.run(input)
-
-    nfa = tree.get_nfa()
-
-    drawGraphNFA(nfa, file)
 
 
 def drawNewNFA(reInput, file = None):
