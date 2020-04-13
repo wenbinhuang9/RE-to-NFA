@@ -1,14 +1,9 @@
-
-
-
 from  lexer import  LexicalAnalyzer
 from graphviz_draw import  drawGraphNFA
 from parser import RegExParser
 from  idgen import  IDGenerator
 
-
-
-def drawNewNFA(reInput, file = None):
+def drawNFA(reInput, file = None):
     lex = LexicalAnalyzer()
 
     lex.run(reInput)
@@ -17,7 +12,6 @@ def drawNewNFA(reInput, file = None):
 
     tree = parser.regex()
 
-    print(tree)
     idgenerator = IDGenerator()
     nfa = tree.get_nfa(idgenerator)
 

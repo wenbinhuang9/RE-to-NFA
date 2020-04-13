@@ -19,10 +19,7 @@ drawNFA(re)
 ```
 
 # Pictures of NFA
-NFA of 'cd|eff|ab'
+NFA of '(0|1)*010'
 
-![image](https://github.com/wenbinhuang9/RE-to-NFA/blob/master/new_nfa_draw.jpg)
+![image](https://github.com/wenbinhuang9/RE-to-NFA/blob/master/test_combination1.svg)
 
-# Issues to fix
-
-3.  cd | eff | ab*, this expression has a parsing bug  
