@@ -9,8 +9,7 @@ The basic idea as follows
 
 ![image](https://github.com/wenbinhuang9/RE-to-NFA/blob/master/flow.png)
 
-
-# How to use
+# Easy start 
 ```
 from  engine import drawNFA
 
@@ -23,3 +22,13 @@ NFA of '(0|1)*010'
 
 ![image](https://github.com/wenbinhuang9/RE-to-NFA/blob/master/test_combination1.svg)
 
+# BNF desing
+
+```
+
+    <re> ::=  <term> '|' <re> | <term>
+    <term> ::= { <factor> }
+    <factor> ::= <base> {'*'}
+    <base> ::= <char> | '(' <re> ')'
+  
+```

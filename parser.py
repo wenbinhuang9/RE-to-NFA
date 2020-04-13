@@ -23,12 +23,7 @@ class RegExParser():
         else:
             return term_v
 
-    """
-    <re> ::=  <term> '|' <re> | <term>
-    <term> ::= { <factor> }
-    <factor> ::= <base> {'*'}
-    <base> ::= <char> | '(' <re> ')'
-    """
+
     def term(self):
         seq = SequenceAST()
         while self.lexer.more() and self.lexer.peak()!= ')' and self.lexer.peak() != '|':
@@ -69,13 +64,27 @@ class StarAST():
     def __init__(self, ast):
         self.child = ast
 
-    def get_nfa(self, idgenerator):
 
+    def isChildSimpleOrAST(self):
+
+        ## simplify the graph when OrAST is like 0|1
+        if isinstance(self.child, OrAST):
+            orAstRepresentation = self.child.__repr__()
+            child_repr = orAstRepresentation.split("|")
+
+            return all([len(c) == 1 for c in child_repr])
+        return False
+
+    def get_nfa(self, idgenerator):
         start = idgenerator.nextID()
-        accept =start
+        accept = start
         root_nfa = NFA().acceptState(accept).startState(start)
 
-        if isinstance(self.child, Primitive):
+        if self.isChildSimpleOrAST():
+            ## convert simple orAst "0|1" to  0,1
+            symbol = self.child.__repr__().replace("|", ",")
+            root_nfa.addTransitions(start, symbol, accept)
+        elif isinstance(self.child, Primitive):
             root_nfa.addTransitions(start, self.child.text(), start)
         else:
             sub_nfa = self.child.get_nfa(idgenerator)
